@@ -69,7 +69,13 @@ AddRoute = BlazeComponent.extendComponent({
 
             'submit .add-csv': function (e) {
                 e.preventDefault();
-                Meteor.call('importRoute', this.points.get());
+
+                var points = this.points.get();
+
+                if (points) {
+                    Meteor.call('importRoute', this.points.get());
+                }
+                this.points.set(false);
                 return false;
             }
         }];
