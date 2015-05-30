@@ -1,3 +1,6 @@
+// http://www.gpsvisualizer.com/convert_input
+// set comma separator
+
 Meteor.startup(function () {
     GoogleMaps.load();
 });
@@ -11,16 +14,13 @@ Template.map.onCreated(function () {
             map: map.instance
         });
 
-        Meteor.call('test', function (err, route) {
 
-            var flightPlanCoordinates = [];
+        var routes = Routes.find().fetch();
 
-            _.each(route, function (point) {
-                flightPlanCoordinates.push(new google.maps.LatLng(point.lat, point.lng));
-            });
+        _.each(routes, function (route) {
 
             var flightPath = new google.maps.Polyline({
-                path: flightPlanCoordinates,
+                path: route.route,
                 geodesic: true,
                 strokeColor: '#FF0000',
                 strokeOpacity: 1.0,
@@ -28,8 +28,6 @@ Template.map.onCreated(function () {
                 map: map.instance
             });
         });
-
-
     });
 });
 
@@ -45,10 +43,35 @@ Template.map.helpers({
     }
 });
 
-Template.addRoute.events({
-    'submit .add-csv': function (e) {
-        e.preventDefault();
-        console.log('test');
-        return false;
+AddRoute = BlazeComponent.extendComponent({
+    onCreated: function () {
+        this.points = new ReactiveVar([]);
+    },
+    events: function () {
+        return [{
+            'change #attachment': function (e) {
+
+                var self = this, points = [];
+
+                Papa.parse(this.find('#attachment').files[0], {
+                    header: true,
+                    skipEmptyLines: true,
+                    dynamicTyping: true,
+                    step: function (row) {
+                        points.push({lat: row.data[0].latitude, lng: row.data[0].longitude});
+                    },
+                    complete: function () {
+                        console.log('imported');
+                        self.points.set(points);
+                    }
+                });
+            },
+
+            'submit .add-csv': function (e) {
+                e.preventDefault();
+                Meteor.call('importRoute', this.points.get());
+                return false;
+            }
+        }];
     }
-});
+}).register('addRoute');

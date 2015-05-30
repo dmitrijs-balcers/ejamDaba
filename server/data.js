@@ -5,34 +5,11 @@ var fs = Npm.require('fs'),
 // Move to the client
 
 Meteor.methods({
-    test: function () {
+    importRoute: function(route) {
+        console.log('importRoute');
 
-        var fut = new Future(), points = [];
-
-        fs.readFile(process.env.PWD + '/data.csv', 'utf8', function (err, data) {
-                if (err) {
-                    fut.throw(err);
-                    return;
-                }
-
-                // Try to use headers as property keys
-                Papa.parse(data,
-                    {
-                        dynamicTyping: true,
-                        step: function (row) {
-                            points.push({
-                                    lat: row.data[0][2],
-                                    lng: row.data[0][3]
-                                }
-                            );
-                        },
-                        complete: function () {
-                            // Why this is being executed two times?
-                            fut.return(points);
-                        }
-                    })
-            });
-
-        return fut.wait();
+        Routes.insert({
+            route: route
+        });
     }
 });
