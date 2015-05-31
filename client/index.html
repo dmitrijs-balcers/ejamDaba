@@ -1,4 +1,11 @@
 <body>
+
+    <p>Datu ielāde ir lēna, tāpēc ir jāsagaida dati!!!</p>
+    <p>Lai pievienotu jaunus ceļus ir jāeksportē ceļš gpx formātā</p>
+    <p>Tad ir jāatver šī saite <a href="http://www.gpsvisualizer.com/convert_input">GPS Visualizer</a></p>
+    <p>Jāievieto eksportētais gpx fails <b>Jāuzliek Plain text delimiter uz comma</b> un jānospiež poga Convert</p>
+    <p>Šobrīd dati netiek reaktīvi atspoguļoti uz kartes tāpēč ir jāsagaida teksts <b>test</b> un tad manuāli jārefrešo lapa</p>
+
     {{> addRoute}}
     {{> map}}
 </body>
@@ -7,7 +14,10 @@
     <form class="add-csv">
         <input type="file" id="attachment">
         <input type="submit" value="test">
-    </form
+    </form>
+    {{#if isDone}}
+        test
+    {{/if}}
 </template>
 
 <template name="map">

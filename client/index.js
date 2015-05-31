@@ -14,18 +14,24 @@ Template.map.onCreated(function () {
             map: map.instance
         });
 
+        Meteor.subscribe('routes', function () {
+            // Collection is empty, most probably issue is in autopublish use sub/pub
+            console.log('Fetching routes');
 
-        var routes = Routes.find().fetch();
+            var routes = Routes.find().fetch();
 
-        _.each(routes, function (route) {
+            console.log('Routes fetched');
 
-            var flightPath = new google.maps.Polyline({
-                path: route.route,
-                geodesic: true,
-                strokeColor: '#FF0000',
-                strokeOpacity: 1.0,
-                strokeWeight: 2,
-                map: map.instance
+            _.each(routes, function (route) {
+
+                var flightPath = new google.maps.Polyline({
+                    path: route.route,
+                    geodesic: true,
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2,
+                    map: map.instance
+                });
             });
         });
     });
@@ -46,6 +52,10 @@ Template.map.helpers({
 AddRoute = BlazeComponent.extendComponent({
     onCreated: function () {
         this.points = new ReactiveVar([]);
+        this.done = new ReactiveVar(false);
+    },
+    isDone: function () {
+        return this.done.get();
     },
     events: function () {
         return [{
@@ -70,13 +80,18 @@ AddRoute = BlazeComponent.extendComponent({
             'submit .add-csv': function (e) {
                 e.preventDefault();
 
-                var points = this.points.get();
+                var self = this,
+                    points = this.points.get();
 
                 if (points) {
-                    Meteor.call('importRoute', this.points.get());
+                    Meteor.call('importRoute', this.points.get(), function(err) {
+                        if (err) {
+                            console.log(err);
+                        }
+                        self.points.set(false);
+                        self.done.set(true);
+                    });
                 }
-                this.points.set(false);
-                return false;
             }
         }];
     }
