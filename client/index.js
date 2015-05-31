@@ -3,6 +3,7 @@
 
 Meteor.startup(function () {
     GoogleMaps.load();
+    Meteor.subscribe('routes');
 });
 
 Template.map.onCreated(function () {
@@ -14,16 +15,8 @@ Template.map.onCreated(function () {
             map: map.instance
         });
 
-        Meteor.subscribe('routes', function () {
-            // Collection is empty, most probably issue is in autopublish use sub/pub
-            console.log('Fetching routes');
-
-            var routes = Routes.find().fetch();
-
-            console.log('Routes fetched');
-
-            _.each(routes, function (route) {
-
+        Routes.find().observeChanges({
+            added: function (id, route) {
                 var flightPath = new google.maps.Polyline({
                     path: route.route,
                     geodesic: true,
@@ -32,8 +25,8 @@ Template.map.onCreated(function () {
                     strokeWeight: 2,
                     map: map.instance
                 });
-            });
-        });
+            }
+        })
     });
 });
 

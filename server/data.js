@@ -6,7 +6,7 @@ var fs = Npm.require('fs'),
 
 Meteor.methods({
     importRoute: function(route) {
-        console.log('importRoute');
+        console.log('importRoute'); // TODO: use simulation
 
         Routes.insert({
             route: route
